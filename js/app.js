@@ -135,3 +135,55 @@ function getCurrentUser() {
     const data = localStorage.getItem('currentUser');
     return data ? JSON.parse(data) : null;
 }
+
+// ========== FUNCIONES DE USUARIOS EN GIST ==========
+const USERS_FILENAME = "users-db.json";
+
+async function getUsers() {
+    if (!GIST_ID) await loadConfig();
+    
+    try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+        const gist = await response.json();
+        const content = gist.files[USERS_FILENAME].content;
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        return [];
+    }
+}
+
+async function addUser(user) {
+    if (!GIST_ID) await loadConfig();
+    
+    try {
+        const users = await getUsers();
+        users.push(user);
+        
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                files: {
+                    [USERS_FILENAME]: {
+                        content: JSON.stringify(users, null, 2)
+                    }
+                }
+            })
+        });
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error al agregar usuario:', error);
+        throw error;
+    }
+}
+
+function getCurrentUser() {
+    const data = localStorage.getItem('currentUser');
+    return data ? JSON.parse(data) : null;
+}
+

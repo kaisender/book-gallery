@@ -47,27 +47,25 @@
     
     <script src="js/app.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            const users = getUsers();
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                localStorage.setItem('currentUser', JSON.stringify({username: user.username}));
-                window.location.href = 'index.html';
-            } else {
-                showMessage('Usuario o contraseña incorrectos', false);
-            }
-        });
-        
-        function showMessage(msg, success) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = `<div class="alert ${success ? 'alert-success' : 'alert-error'}">${msg}</div>`;
-        }
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    showMessage('Verificando credenciales...', true);
+    
+    const users = await getUsers(); // AWAIT aquí
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        localStorage.setItem('currentUser', JSON.stringify({username: user.username}));
+        window.location.href = 'index.html';
+    } else {
+        showMessage('Usuario o contraseña incorrectos', false);
+    }
+});
+
     </script>
 </body>
 </html>
