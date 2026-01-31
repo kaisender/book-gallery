@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">📚 Mi Galería</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="register.html" class="nav-link active">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-box">
+            <h1>📝 Crear Cuenta</h1>
+            
+            <div id="message"></div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" required placeholder="Elige un nombre de usuario">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="tu@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                
+                <button type="submit" class="btn">Registrarse</button>
+            </form>
+            
+            <p class="auth-switch">
+                ¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a>
+            </p>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (password.length < 6) {
+                showMessage('La contraseña debe tener al menos 6 caracteres', false);
+                return;
+            }
+            
+            const users = getUsers();
+            
+            if (users.find(u => u.username === username)) {
+                showMessage('El usuario ya existe', false);
+                return;
+            }
+            
+            users.push({username, email, password});
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showMessage('¡Cuenta creada exitosamente!', true);
+            setTimeout(() => window.location.href = 'login.html', 1500);
+        });
+        
+        function showMessage(msg, success) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="alert ${success ? 'alert-success' : 'alert-error'}">${msg}</div>`;
+        }
+    </script>
+</body>
+</html>

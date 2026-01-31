@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería Libro</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">📚 Mi Galería</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link active">Home</a></li>
+                <li><a href="admin.html" class="nav-link" id="createLink">Create</a></li>
+                <li><a href="#" class="nav-link" id="authLink">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="gallery-header">
+        <h1>📖 Mi Galería Personal</h1>
+    </div>
+    
+    <div class="gallery-container" id="galleryContainer">
+        <!-- Los libros se generarán aquí -->
+    </div>
+    
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <h2>La galería está vacía</h2>
+        <p>No hay contenido para mostrar todavía</p>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script>
+        // Verificar si el usuario está logueado
+        function checkAuth() {
+            const currentUser = localStorage.getItem('currentUser');
+            const authLink = document.getElementById('authLink');
+            const createLink = document.getElementById('createLink');
+            
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                authLink.textContent = 'Logout (' + user.username + ')';
+                authLink.href = '#';
+                authLink.onclick = function() {
+                    localStorage.removeItem('currentUser');
+                    window.location.reload();
+                };
+                createLink.style.display = 'block';
+            } else {
+                authLink.textContent = 'Login';
+                authLink.href = 'login.html';
+                createLink.style.display = 'none';
+            }
+        }
+        
+        function renderGallery() {
+            const gallery = getGallery();
+            const container = document.getElementById('galleryContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (gallery.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = gallery.map(item => `
+                <div class="book">
+                    <div class="cover">
+                        <div class="pages">
+                            <div class="page page-left">
+                                <img src="${item.image}" alt="${item.title}">
+                            </div>
+                            <div class="line"></div>
+                            <div class="page page-right">
+                                <h2>${item.title}</h2>
+                                <p>${item.description}</p>
+                                <div class="date">${new Date(item.date).toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        checkAuth();
+        renderGallery();
+    </script>
+</body>
+</html>
