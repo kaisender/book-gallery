@@ -160,17 +160,24 @@
             };
             
             try {
-                showMessage('Subiendo imagen...', true);
-                await addToGallery(newItem);
-                showMessage('¡Entrada publicada exitosamente!', true);
-                
-                document.getElementById('uploadForm').reset();
-                document.getElementById('preview').innerHTML = '';
-                await loadCurrentGallery();
-            } catch (error) {
-                console.error('Error completo:', error);
-                showMessage('Error al publicar. Verifica tu conexión.', false);
-            }
+    showMessage('Subiendo imagen...', true);
+    await addToGallery(newItem);
+    
+    // Limpiar caché para forzar actualización
+    localStorage.removeItem('cachedGallery');
+    
+    showMessage('¡Entrada publicada! Redirigiendo...', true);
+    
+    // Esperar 1 segundo y redirigir al home
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1000);
+    
+} catch (error) {
+    console.error('Error completo:', error);
+    showMessage('Error al publicar. Verifica tu conexión.', false);
+}
+
         };
         img.src = event.target.result;
     };

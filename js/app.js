@@ -3,6 +3,72 @@ let GIST_ID = "";
 let GITHUB_TOKEN = "";
 const GIST_FILENAME = "gallery-db.json";
 
+
+// ========== CACHÉ LOCAL PARA VELOCIDAD ==========
+function getCachedGallery() {
+    const cached = localStorage.getItem('cachedGallery');
+    return cached ? JSON.parse(cached) : null;
+}
+
+function setCachedGallery(gallery) {
+    localStorage.setItem('cachedGallery', JSON.stringify(gallery));
+}
+
+// Modificar la función getGallery existente:
+async function getGallery(useCache = true) {
+    if (!GIST_ID) {
+        await loadConfig();
+    }
+    
+    // Devolver caché inmediatamente si existe
+    if (useCache) {
+        const cached = getCachedGallery();
+        if (cached) {
+            // Actualizar en segundo plano
+            updateGalleryCache();
+            return cached;
+        }
+    }
+    
+    if (!GIST_ID || !GITHUB_TOKEN) {
+        console.error('Credenciales no disponibles');
+        return [];
+    }
+    
+    try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+        
+        if (!response.ok) {
+            console.error('Error en GitHub API:', response.status);
+            return [];
+        }
+        
+        const gist = await response.json();
+        const content = gist.files[GIST_FILENAME].content;
+        const gallery = JSON.parse(content);
+        const result = Array.isArray(gallery) ? gallery : [];
+        
+        // Guardar en caché
+        setCachedGallery(result);
+        
+        return result;
+    } catch (error) {
+        console.error('Error al obtener galería:', error);
+        return getCachedGallery() || [];
+    }
+}
+
+// Función para actualizar caché en background
+async function updateGalleryCache() {
+    try {
+        const gallery = await getGallery(false); // Sin usar caché
+        setCachedGallery(gallery);
+    } catch (error) {
+        console.error('Error actualizando caché:', error);
+    }
+}
+
+
 // Cargar configuración desde Netlify
 async function loadConfig() {
     try {

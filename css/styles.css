@@ -571,4 +571,78 @@ textarea {
     background: #2C2C2C;
 }
 
+/* ========== CONTROLES DE NAVEGACIÓN DEL LIBRO ========== */
+.book-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 50px;
+    padding: 20px;
+}
+
+.book-btn {
+    background: #000000;
+    color: #FFFFFF;
+    border: 2px solid #000000;
+    padding: 15px 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Inter', sans-serif;
+}
+
+.book-btn:hover:not(:disabled) {
+    background: #FFFFFF;
+    color: #000000;
+    transform: translateY(-2px);
+}
+
+.book-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000000;
+    min-width: 100px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Animación de transición de página */
+#currentBook {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .book-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .book-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+
 }

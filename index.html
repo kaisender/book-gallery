@@ -23,8 +23,18 @@
         <h1>📖 Mi Galería Personal</h1>
     </div>
     
+    <!-- Contenedor de libro único -->
     <div class="gallery-container" id="galleryContainer">
-        <!-- Los libros se generarán aquí -->
+        <div class="book" id="currentBook">
+            <!-- Aquí se cargará cada página -->
+        </div>
+        
+        <!-- Controles de navegación -->
+        <div class="book-controls">
+            <button id="prevBtn" class="book-btn">← Anterior</button>
+            <span id="pageIndicator" class="page-indicator">1 / 1</span>
+            <button id="nextBtn" class="book-btn">Siguiente →</button>
+        </div>
     </div>
     
     <div class="empty-state" id="emptyState" style="display: none;">
@@ -33,80 +43,124 @@
     </div>
     
     <script src="js/app.js"></script>
-<script>
-    // Verificar autenticación
-    function checkAuth() {
-        const currentUser = localStorage.getItem('currentUser');
-        const authLink = document.getElementById('authLink');
+    <script>
+        let currentPage = 0;
+        let galleryData = [];
         
-        if (currentUser) {
-            const user = JSON.parse(currentUser);
-            authLink.textContent = 'Logout';
-            authLink.href = '#';
-            authLink.onclick = function(e) {
-                e.preventDefault();
-                localStorage.removeItem('currentUser');
-                window.location.reload();
-            };
-        } else {
-            authLink.textContent = 'Login';
-            authLink.href = 'login.html';
-        }
-    }
-    
-    // Renderizar galería (ASYNC - ESPERA LA GALERÍA)
-    async function renderGallery() {
-        try {
-            const gallery = await getGallery(); // AWAIT aquí
-            const container = document.getElementById('galleryContainer');
-            const emptyState = document.getElementById('emptyState');
+        // Verificar autenticación
+        function checkAuth() {
+            const currentUser = localStorage.getItem('currentUser');
+            const authLink = document.getElementById('authLink');
             
-            // Verificar que gallery es un array
-            if (!Array.isArray(gallery) || gallery.length === 0) {
-                container.style.display = 'none';
-                emptyState.style.display = 'flex';
-                return;
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                authLink.textContent = 'Logout';
+                authLink.href = '#';
+                authLink.onclick = function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('currentUser');
+                    window.location.reload();
+                };
+            } else {
+                authLink.textContent = 'Login';
+                authLink.href = 'login.html';
             }
+        }
+        
+        // Renderizar página específica
+        function renderPage(index) {
+            if (galleryData.length === 0) return;
             
-            container.style.display = 'flex';
-            emptyState.style.display = 'none';
+            const item = galleryData[index];
+            const bookContainer = document.getElementById('currentBook');
             
-            container.innerHTML = gallery.map(item => `
-                <div class="book">
-                    <div class="cover">
-                        <div class="pages">
-                            <div class="page page-left">
-                                <img src="${item.image}" alt="${item.title}">
-                            </div>
-                            <div class="line"></div>
-                            <div class="page page-right">
-                                <h2>${item.title}</h2>
-                                <p>${item.description}</p>
-                                <div class="date">${new Date(item.date).toLocaleDateString('es-ES', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}</div>
-                            </div>
+            bookContainer.innerHTML = `
+                <div class="cover">
+                    <div class="pages">
+                        <div class="page page-left">
+                            <img src="${item.image}" alt="${item.title}">
+                        </div>
+                        <div class="line"></div>
+                        <div class="page page-right">
+                            <h2>${item.title}</h2>
+                            <p>${item.description}</p>
+                            <div class="date">${new Date(item.date).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}</div>
                         </div>
                     </div>
                 </div>
-            `).join('');
-        } catch (error) {
-            console.error('Error renderizando galería:', error);
-            document.getElementById('emptyState').style.display = 'flex';
+            `;
+            
+            // Actualizar indicador de página
+            document.getElementById('pageIndicator').textContent = 
+                `${index + 1} / ${galleryData.length}`;
+            
+            // Deshabilitar botones según página
+            document.getElementById('prevBtn').disabled = (index === 0);
+            document.getElementById('nextBtn').disabled = (index === galleryData.length - 1);
         }
-    }
-    
-    // Inicializar (ASYNC)
-    async function init() {
-        checkAuth();
-        await renderGallery(); // AWAIT aquí también
-    }
-    
-    // Ejecutar cuando cargue la página
-    init();
-</script>
-
+        
+        // Navegación
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                renderPage(currentPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentPage < galleryData.length - 1) {
+                currentPage++;
+                renderPage(currentPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                document.getElementById('prevBtn').click();
+            } else if (e.key === 'ArrowRight') {
+                document.getElementById('nextBtn').click();
+            }
+        });
+        
+        // Renderizar galería
+        async function renderGallery() {
+            try {
+                galleryData = await getGallery();
+                const container = document.getElementById('galleryContainer');
+                const emptyState = document.getElementById('emptyState');
+                
+                if (!Array.isArray(galleryData) || galleryData.length === 0) {
+                    container.style.display = 'none';
+                    emptyState.style.display = 'flex';
+                    return;
+                }
+                
+                container.style.display = 'flex';
+                emptyState.style.display = 'none';
+                
+                // Mostrar primera página
+                currentPage = 0;
+                renderPage(currentPage);
+            } catch (error) {
+                console.error('Error renderizando galería:', error);
+                document.getElementById('emptyState').style.display = 'flex';
+            }
+        }
+        
+        // Inicializar
+        async function init() {
+            checkAuth();
+            await renderGallery();
+        }
+        
+        init();
+    </script>
 </body>
 </html>
