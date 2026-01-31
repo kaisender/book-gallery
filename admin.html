@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Create - Panel de Administración</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">📚 Mi Galería</div>
+            <a href="index.html" class="nav-logo">📚 Mi Galería</a>
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="admin.html" class="nav-link active">Create</a></li>
@@ -20,32 +20,32 @@
     </nav>
 
     <div class="admin-container">
-        <h1>📚 Panel de Administración</h1>
+        <h1>✍️ Crear Nueva Entrada</h1>
         
         <div id="message"></div>
         
         <form id="uploadForm">
             <div class="form-group">
-                <label for="title">Título de la entrada</label>
-                <input type="text" id="title" required placeholder="Ej: Mi viaje a París">
+                <label for="title">Título</label>
+                <input type="text" id="title" required placeholder="Título de tu historia">
             </div>
             
             <div class="form-group">
-                <label for="description">Descripción o texto</label>
-                <textarea id="description" required placeholder="Escribe aquí tu historia..."></textarea>
+                <label for="description">Descripción</label>
+                <textarea id="description" required placeholder="Escribe aquí tu historia o descripción..."></textarea>
             </div>
             
             <div class="form-group">
-                <label for="imageInput">Seleccionar imagen</label>
+                <label for="imageInput">Imagen</label>
                 <input type="file" id="imageInput" accept="image/*" required>
                 <div id="preview" class="preview"></div>
             </div>
             
-            <button type="submit" class="btn">Agregar a la galería</button>
+            <button type="submit" class="btn">Publicar Entrada</button>
         </form>
         
         <div class="gallery-list">
-            <h2>Entradas actuales</h2>
+            <h2>Mis Entradas</h2>
             <div id="currentGallery"></div>
         </div>
     </div>
@@ -55,13 +55,13 @@
         // Verificar autenticación
         const currentUser = localStorage.getItem('currentUser');
         if (!currentUser) {
+            alert('Debes iniciar sesión para acceder a esta página');
             window.location.href = 'login.html';
         }
         
         const authLink = document.getElementById('authLink');
-        const user = JSON.parse(currentUser);
-        authLink.textContent = 'Logout (' + user.username + ')';
-        authLink.onclick = function() {
+        authLink.onclick = function(e) {
+            e.preventDefault();
             localStorage.removeItem('currentUser');
             window.location.href = 'login.html';
         };
@@ -84,7 +84,7 @@
             const container = document.getElementById('currentGallery');
             
             if (gallery.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">No hay entradas todavía</p>';
+                container.innerHTML = '<p style="text-align: center; color: #9B9B9B; padding: 40px;">No hay entradas todavía</p>';
                 return;
             }
             
@@ -124,7 +124,7 @@
                 };
                 
                 addToGallery(newItem);
-                showMessage('¡Entrada agregada exitosamente!', true);
+                showMessage('¡Entrada publicada exitosamente!', true);
                 
                 document.getElementById('uploadForm').reset();
                 document.getElementById('preview').innerHTML = '';

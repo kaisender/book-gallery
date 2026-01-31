@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galería Libro</title>
+    <title>Galería - Home</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">📚 Mi Galería</div>
+            <a href="index.html" class="nav-logo">📚 Mi Galería</a>
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link active">Home</a></li>
                 <li><a href="admin.html" class="nav-link" id="createLink">Create</a></li>
-                <li><a href="#" class="nav-link" id="authLink">Login</a></li>
+                <li><a href="login.html" class="nav-link" id="authLink">Login</a></li>
             </ul>
         </div>
     </nav>
@@ -42,17 +42,16 @@
             
             if (currentUser) {
                 const user = JSON.parse(currentUser);
-                authLink.textContent = 'Logout (' + user.username + ')';
+                authLink.textContent = 'Logout';
                 authLink.href = '#';
-                authLink.onclick = function() {
+                authLink.onclick = function(e) {
+                    e.preventDefault();
                     localStorage.removeItem('currentUser');
                     window.location.reload();
                 };
-                createLink.style.display = 'block';
             } else {
                 authLink.textContent = 'Login';
                 authLink.href = 'login.html';
-                createLink.style.display = 'none';
             }
         }
         
