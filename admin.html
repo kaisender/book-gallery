@@ -51,11 +51,35 @@
     </div>
     
     <script src="js/app.js"></script>
-    // Después de la línea: const authLink = document.getElementById('authLink');
-// Y antes de: authLink.onclick = function(e) {
-
-// Cargar galería actual
-async function loadCurrentGallery() {
+    <script>
+        // Verificar autenticación
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            alert('Debes iniciar sesión para acceder a esta página');
+            window.location.href = 'login.html';
+        }
+        
+        const authLink = document.getElementById('authLink');
+        authLink.onclick = function(e) {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        };
+        
+        // Preview de la imagen
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('preview').innerHTML = 
+                        `<img src="${event.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        async function loadCurrentGallery() {
     try {
         const gallery = await getGallery();
         const container = document.getElementById('currentGallery');
@@ -79,12 +103,58 @@ async function loadCurrentGallery() {
         console.error('Error cargando galería:', error);
     }
 }
-
-// Resto del código igual hasta el final, y al final cambia:
-
-// De: loadCurrentGallery();
-// A: 
-loadCurrentGallery(); // Esta línea mantenerla
-
+        
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const imageInput = document.getElementById('imageInput');
+            
+            if (imageInput.files.length === 0) {
+                showMessage('Por favor selecciona una imagen', false);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageData = event.target.result;
+                
+                const newItem = {
+                    title: title,
+                    description: description,
+                    image: imageData,
+                    date: new Date().toISOString()
+                };
+                
+                addToGallery(newItem);
+                showMessage('¡Entrada publicada exitosamente!', true);
+                
+                document.getElementById('uploadForm').reset();
+                document.getElementById('preview').innerHTML = '';
+                loadCurrentGallery();
+            };
+            
+            reader.readAsDataURL(imageInput.files[0]);
+        });
+        
+        function showMessage(msg, success) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="alert ${success ? 'alert-success' : 'alert-error'}">${msg}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 3000);
+        }
+        
+        function deleteItem(index) {
+            if (confirm('¿Estás seguro de eliminar esta entrada?')) {
+                let gallery = getGallery();
+                gallery.splice(index, 1);
+                localStorage.setItem('bookGallery', JSON.stringify(gallery));
+                loadCurrentGallery();
+                showMessage('Entrada eliminada', true);
+            }
+        }
+        
+        loadCurrentGallery();
+    </script>
 </body>
 </html>
